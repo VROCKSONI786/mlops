@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Stock Price Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            align-self: flex-end;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+        }
+
+        .prediction-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .prediction-label {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .confidence {
+            font-size: 1.5em;
+            opacity: 0.95;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .indicators-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .indicators-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .indicator-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .indicator-item:last-child {
+            border-bottom: none;
+        }
+
+        .error-message {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .up-prediction {
+            color: #10b981;
+        }
+
+        .down-prediction {
+            color: #ef4444;
+        }
+
+        .probability-bars {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .probability-bar {
+            flex: 1;
+        }
+
+        .bar-label {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .bar-container {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .main-card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .input-section {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📈 Stock Price Predictor</h1>
+            <p class="subtitle">Real-time ML-powered stock movement predictions</p>
+        </header>
+
+        <div class="main-card">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="ticker">Stock Ticker Symbol</label>
+                    <input type="text" id="ticker" placeholder="e.g., AAPL, GOOGL, MSFT" value="AAPL">
+                </div>
+                <button onclick="makePrediction()">Get Prediction</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing stock data and generating prediction...</p>
+            </div>
+
+            <div class="error-message" id="error"></div>
+
+            <div class="result-section" id="results">
+                <div class="prediction-card">
+                    <h2>Prediction Result</h2>
+                    <div class="prediction-label" id="predictionLabel">--</div>
+                    <div class="confidence">Confidence: <span id="confidence">--</span>%</div>
+                    
+                    <div class="probability-bars">
+                        <div class="probability-bar">
+                            <div class="bar-label">Probability UP ⬆️</div>
+                            <div class="bar-container">
+                                <div class="bar-fill" id="barUp" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                        <div class="probability-bar">
+                            <div class="bar-label">Probability DOWN ⬇️</div>
+                            <div class="bar-container">
+                                <div class="bar-fill" id="barDown" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Stock Information</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Company</div>
+                        <div class="stat-value" id="stockName">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Current Price</div>
+                        <div class="stat-value" id="currentPrice">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Volume</div>
+                        <div class="stat-value" id="volume">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Date</div>
+                        <div class="stat-value" id="date">--</div>
+                    </div>
+                </div>
+
+                <div class="indicators-section">
+                    <h3>Technical Indicators</h3>
+                    <div class="indicator-item">
+                        <span>SMA (20-day)</span>
+                        <strong id="sma20">--</strong>
+                    </div>
+                    <div class="indicator-item">
+                        <span>RSI</span>
+                        <strong id="rsi">--</strong>
+                    </div>
+                    <div class="indicator-item">
+                        <span>MACD</span>
+                        <strong id="macd">--</strong>
+                    </div>
+                    <div class="indicator-item">
+                        <span>Volatility</span>
+                        <strong id="volatility">--</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function makePrediction() {
+            const ticker = document.getElementById('ticker').value.toUpperCase().trim();
+            
+            if (!ticker) {
+                showError('Please enter a stock ticker symbol');
+                return;
+            }
+
+            // Reset UI
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ticker: ticker })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Prediction failed');
+                }
+
+                displayResults(data);
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            // Prediction
+            const predictionLabel = document.getElementById('predictionLabel');
+            predictionLabel.textContent = data.prediction;
+            predictionLabel.className = 'prediction-label ' + 
+                (data.prediction === 'UP' ? 'up-prediction' : 'down-prediction');
+
+            document.getElementById('confidence').textContent = data.confidence;
+
+            // Probability bars
+            document.getElementById('barUp').style.width = data.probability_up + '%';
+            document.getElementById('barUp').textContent = data.probability_up + '%';
+            
+            document.getElementById('barDown').style.width = data.probability_down + '%';
+            document.getElementById('barDown').textContent = data.probability_down + '%';
+
+            // Stock info
+            document.getElementById('stockName').textContent = data.stock_name;
+            document.getElementById('currentPrice').textContent = '$' + data.current_price.toFixed(2);
+            document.getElementById('volume').textContent = data.latest_data.volume.toLocaleString();
+            document.getElementById('date').textContent = new Date(data.latest_data.date).toLocaleDateString();
+
+            // Technical indicators
+            document.getElementById('sma20').textContent = '$' + data.technical_indicators.sma_20.toFixed(2);
+            document.getElementById('rsi').textContent = data.technical_indicators.rsi.toFixed(2);
+            document.getElementById('macd').textContent = data.technical_indicators.macd.toFixed(4);
+            document.getElementById('volatility').textContent = (data.technical_indicators.volatility * 100).toFixed(2) + '%';
+
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Allow Enter key to trigger prediction
+        document.getElementById('ticker').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makePrediction();
+            }
+        });
+    </script>
+</body>
+</html>

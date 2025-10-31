@@ -1,0 +1,58 @@
+version: '3.8'
+services:
+  # Stock Prediction API
+  stock-api:
+    build: .
+    container_name: stock-predictor-api
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./mlruns:/app/mlruns
+    environment:
+      - FLASK_ENV=production
+      - MLFLOW_TRACKING_URI=file:///app/mlruns
+      - PYTHONHTTPSVERIFY=1
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+    dns:
+      - 1.1.1.1  # Cloudflare
+      - 8.8.8.8  # Google
+    network_mode: "host"  # Use host networking to avoid Docker DNS issues
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: stock-predictor-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - stock-api
+    restart: unless-stopped
+
+  # MLflow UI
+  mlflow:
+    image: python:3.9-slim
+    container_name: mlflow-ui
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./mlruns:/mlruns
+    command: >
+      sh -c "pip install mlflow==2.7.1 && 
+             mlflow ui --host 0.0.0.0 --port 5001 --backend-store-uri file:///mlruns"
+    restart: unless-stopped
+
+volumes:
+  models:
+  data:
+  mlruns:

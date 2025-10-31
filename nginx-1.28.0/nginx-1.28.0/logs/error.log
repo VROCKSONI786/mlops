@@ -1,0 +1,10 @@
+2025/08/19 17:40:44 [notice] 19244#19704: signal process started
+2025/08/19 17:43:11 [notice] 1096#1288: signal process started
+2025/08/19 17:43:23 [notice] 8736#21216: signal process started
+2025/08/19 17:52:46 [notice] 13224#13712: signal process started
+2025/08/19 18:00:21 [error] 4452#22120: *1 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "POST /predict HTTP/1.1", upstream: "http://127.0.0.1:5000/predict", host: "localhost", referrer: "http://localhost/"
+2025/08/19 18:00:28 [error] 4452#22120: *1 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:5000/", host: "localhost"
+2025/08/19 23:20:23 [notice] 13200#14392: signal process started
+2025/08/20 16:06:28 [notice] 18880#6388: signal process started
+2025/08/21 17:32:33 [notice] 19996#11240: signal process started
+2025/08/21 17:37:06 [notice] 17680#2416: signal process started

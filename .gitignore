@@ -1,0 +1,7 @@
+/data/
+__pycache__/
+/mlruns/
+.env
+/nginx-1.28.0/nginx-1.28.0/contrib/
+/models/
+.vscode/
