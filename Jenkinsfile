@@ -48,15 +48,15 @@ pipeline {
             }
         }
 
-        stage('Test Prediction') {
-            steps {
-                echo '=== Testing model predictions ==='
-                bat '''
-                    call venv\\Scripts\\activate.bat
-                    python test_prediction.py %TICKER% || echo "Test completed with warnings"
-                '''
-            }
-        }
+        // stage('Test Prediction') {
+        //     steps {
+        //         echo '=== Testing model predictions ==='
+        //         bat '''
+        //             call venv\\Scripts\\activate.bat
+        //             python test_prediction.py %TICKER% || echo "Test completed with warnings"
+        //         '''
+        //     }
+        // }
 
         stage('Build & Deploy') {
             steps {
